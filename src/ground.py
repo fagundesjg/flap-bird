@@ -8,7 +8,7 @@ class Ground(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.size = size
         self.image = pygame.transform.scale(pygame.image.load(os.path.join(
-            "src", "assets", "sprites", "base.png")), self.size)
+            "src", "assets", "sprites", "base.png")).convert_alpha(), self.size)
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.game_speed = game_speed
