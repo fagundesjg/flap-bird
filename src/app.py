@@ -23,7 +23,7 @@ class App():
         self.bird_group = pygame.sprite.Group()
         self.ground_group = pygame.sprite.Group()
         self.__add_bird()
-        self.__add_ground(height=self.size[1] / 8)
+        self.__add_ground()
         self.die_sound = pygame.mixer.Sound(os.path.join(
             "src", "assets", "audio", "die.wav"))
 
@@ -32,14 +32,12 @@ class App():
         self.bird.rect[1] = self.size[1] / 2 - 12.5
         self.bird_group.add(self.bird)
 
-    def __add_ground(self, height):
-        height = int(height)
-        for i in range(2):
-            ground = Ground(size=(self.size[0], height),
-                            game_speed=self.game_speed)
-            ground.rect[0] = i * self.size[0]
-            ground.rect[1] = self.size[1] - height
-            self.ground_group.add(ground)
+    def __add_ground(self):
+        height = int(self.size[1] / 8)
+        ground = Ground(size=(self.size[0] * 2, height),
+                        pos=(0, self.size[1] - height),
+                        game_speed=self.game_speed)
+        self.ground_group.add(ground)
 
     def __x_is_off_screen(self, sprite):
         return sprite.rect[0] < -(sprite.rect[2])
@@ -47,22 +45,11 @@ class App():
     def __y_is_off_screen(self, sprite):
         return sprite.rect[1] < -(sprite.rect[3])
 
-    def __handle_ground_loop(self):
-        if self.__x_is_off_screen(sprite=self.ground_group.sprites()[0]):
-            self.ground_group.remove(self.ground_group.sprites()[0])
-            height = int(self.size[1] / 8)
-            ground = Ground(size=(self.size[0], height),
-                            game_speed=self.game_speed)
-            ground.rect[0] = self.size[0] - 30
-            ground.rect[1] = self.size[1] - height
-            self.ground_group.add(ground)
-
     def update(self):
         self.screen.blit(self.backgrounds[0], (0, 0))
 
         self.bird_group.update()
         self.ground_group.update()
-        self.__handle_ground_loop()
 
         self.bird_group.draw(self.screen)
         self.ground_group.draw(self.screen)
