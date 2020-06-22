@@ -2,7 +2,7 @@ import os
 import sys
 
 import pygame
-from pygame.locals import K_SPACE, KEYDOWN, QUIT
+from pygame.locals import QUIT, K_SPACE, KEYDOWN
 
 from src.bird import Bird
 from src.ground import Ground
@@ -12,7 +12,8 @@ class App():
     def __init__(self):
         pygame.init()
         self.size = (300, 600)
-        self.game_speed = 7
+        self.started = False
+        self.game_speed = 5
         self.gravity = 1
         self.clock = pygame.time.Clock()
         self.backgrounds = [pygame.transform.scale(pygame.image.load(os.path.join(
@@ -23,6 +24,8 @@ class App():
         self.ground_group = pygame.sprite.Group()
         self.__add_bird()
         self.__add_ground(height=self.size[1] / 8)
+        self.die_sound = pygame.mixer.Sound(os.path.join(
+            "src", "assets", "audio", "die.wav"))
 
     def __add_bird(self):
         self.bird.rect[0] = self.size[0] / 2 - 15
@@ -71,15 +74,21 @@ class App():
         while running:
             self.clock.tick(30)
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == QUIT:
                     sys.exit()
 
                 if event.type == KEYDOWN:
-                    if event.key == K_SPACE and not self.__y_is_off_screen(self.bird_group.sprites()[0]):
-                        self.bird.bump()
+                    if self.started:
+                        if event.key == K_SPACE and not self.__y_is_off_screen(self.bird_group.sprites()[0]):
+                            self.bird.bump()
+                    if not self.started:
+                        if event.key == K_SPACE:
+                            self.started = True
+                            self.bird.start()
 
             if (pygame.sprite.groupcollide(self.bird_group, self.ground_group, False, False, pygame.sprite.collide_mask)):
                 running = False
 
             self.update()
+
         print(">> Game over!")
