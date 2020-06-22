@@ -15,6 +15,7 @@ from src.configs import SCREEN_SIZE, GAME_SPEED, GRAVITY, FPS
 class App():
     def __init__(self):
         pygame.init()
+        self.running = True
         self.size = SCREEN_SIZE
         self.started = False
         self.game_speed = GAME_SPEED
@@ -96,6 +97,27 @@ class App():
             if self.__x_is_off_screen(sprite):
                 self.pipe_group.remove(sprite)
 
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                sys.exit()
+
+            if event.type == KEYDOWN:
+                if self.started:
+                    if event.key == K_SPACE and not self.__y_is_off_screen(self.bird_group.sprites()[0]):
+                        self.bird.bump()
+                if not self.started:
+                    if event.key == K_SPACE:
+                        self.started = True
+                        self.bird.start()
+                        self.generate_pipe()
+
+        if (pygame.sprite.groupcollide(self.bird_group, self.ground_group, False, False, pygame.sprite.collide_mask)):
+            self.running = False
+        if(pygame.sprite.groupcollide(self.bird_group, self.pipe_group, False, False, pygame.sprite.collide_mask)):
+            self.hit_sound.play()
+            self.running = False
+
     def update(self):
         self.screen.blit(self.backgrounds[0], (0, 0))
 
@@ -113,29 +135,8 @@ class App():
         pygame.display.update()
 
     def start(self):
-        running = True
-        while running:
+        while self.running:
             self.clock.tick(FPS)
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    sys.exit()
-
-                if event.type == KEYDOWN:
-                    if self.started:
-                        if event.key == K_SPACE and not self.__y_is_off_screen(self.bird_group.sprites()[0]):
-                            self.bird.bump()
-                    if not self.started:
-                        if event.key == K_SPACE:
-                            self.started = True
-                            self.bird.start()
-                            self.generate_pipe()
-
-            if (pygame.sprite.groupcollide(self.bird_group, self.ground_group, False, False, pygame.sprite.collide_mask)):
-                running = False
-            if(pygame.sprite.groupcollide(self.bird_group, self.pipe_group, False, False, pygame.sprite.collide_mask)):
-                self.hit_sound.play()
-                running = False
-
+            self.handle_events()
             self.update()
-
         print(">> Game over!")
