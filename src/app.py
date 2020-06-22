@@ -9,20 +9,22 @@ from src.bird import Bird
 from src.ground import Ground
 from src.pipe import Pipe
 from src.score import Score
+from src.configs import SCREEN_SIZE, GAME_SPEED, GRAVITY, FPS
 
 
 class App():
     def __init__(self):
         pygame.init()
-        self.size = (300, 600)
+        self.size = SCREEN_SIZE
         self.started = False
-        self.game_speed = 5
-        self.gravity = 1
+        self.game_speed = GAME_SPEED
+        self.gravity = GRAVITY
         self.clock = pygame.time.Clock()
         self.backgrounds = [pygame.transform.scale(pygame.image.load(os.path.join(
             "src", "assets", "sprites", "background-day.png")), self.size), pygame.transform.scale(pygame.image.load(os.path.join("src", "assets", "sprites", "background-night.png")), self.size)]
         self.screen = pygame.display.set_mode(self.size)
-        self.bird = Bird(color="yellow", size=(30, 25), gravity=self.gravity)
+        self.bird_size = (int(self.size[0] / 10), int(self.size[1] / 24))
+        self.bird = Bird(color="yellow", size=self.bird_size)
         self.score = 0
         self.bird_group = pygame.sprite.Group()
         self.ground_group = pygame.sprite.Group()
@@ -45,17 +47,18 @@ class App():
 
     def generate_pipe(self):
         pipe_height = int(self.size[1] / 2)
-        offset = randint(0, 200)
+        offset = randint(0, int(self.size[1] / 3))
         for i in range(2):
             offset *= 1 if i == 1 else -1
-            pos_y = i * (self.size[1] - 150) + offset
+            pos_y = i * (self.size[1] - int(self.size[1] / 4)) + offset
             pipe = Pipe(color="green", game_speed=self.game_speed,
-                        size=(50, pipe_height), pos=(self.size[0], pos_y), inverted=not bool(i))
+                        size=(int(self.size[0] / 6), pipe_height), pos=(self.size[0], pos_y), inverted=not bool(i))
             self.pipe_group.add(pipe)
 
     def __add_bird(self):
-        self.bird.rect[0] = self.size[0] / 2 - 15
-        self.bird.rect[1] = self.size[1] / 2 - 12.5
+        # Responsável por fazer o passaro aparecer no centro da tela
+        self.bird.rect[0] = self.size[0] / 2 - self.bird_size[0] / 2
+        self.bird.rect[1] = self.size[1] / 2 - self.bird_size[1] / 2
         self.bird_group.add(self.bird)
 
     def __add_ground(self):
@@ -70,9 +73,12 @@ class App():
             self.score_group.remove(sprite)
         i = 0
         score_points = f"{self.score}"
-        margin_left = int((self.size[0] / 2) - (len(score_points) * 27) / 2)
+        spacing = self.size[1] / 24
+        size = len(score_points)
+        margin_left = int((self.size[0] / 2) - (size * spacing + size * 2) / 2)
         for num in score_points:
-            score = Score(num=num, pos=(margin_left + (i*27), 60))
+            score = Score(num=num, pos=(
+                margin_left + (i * (spacing + 2)), self.size[1] / 10))
             self.score_group.add(score)
             i += 1
 
@@ -109,7 +115,7 @@ class App():
     def start(self):
         running = True
         while running:
-            self.clock.tick(30)
+            self.clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     sys.exit()

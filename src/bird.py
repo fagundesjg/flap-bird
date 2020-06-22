@@ -2,13 +2,15 @@ import os
 
 import pygame
 
+from src.configs import GRAVITY, GAME_SPEED, SCREEN_SIZE
+
 
 class Bird(pygame.sprite.Sprite):
-    def __init__(self, color, size, gravity):
+    def __init__(self, color, size):
         pygame.sprite.Sprite.__init__(self)
         self.started = False
-        self.gravity = gravity
-        self.speed = 5
+        self.gravity = GRAVITY
+        self.game_speed = GAME_SPEED
         self.size = size
         self.color = color
         self.current_image = 0
@@ -21,10 +23,10 @@ class Bird(pygame.sprite.Sprite):
             "src", "assets", "audio", "wing.wav"))
 
     def bump(self):
-        self.speed -= 12
+        self.game_speed -= int(SCREEN_SIZE[1] / 50)
         self.bump_sound.play()
-        if self.speed < -20:
-            self.speed = -20
+        if self.game_speed < -int(SCREEN_SIZE[1] / 30):
+            self.game_speed = -int(SCREEN_SIZE[1] / 30)
 
     def start(self):
         self.started = True
@@ -33,5 +35,5 @@ class Bird(pygame.sprite.Sprite):
         self.current_image = (self.current_image + 1) % len(self.images)
         self.image = self.images[self.current_image]
         if self.started:
-            self.speed += self.gravity
-            self.rect[1] += self.speed
+            self.game_speed += self.gravity
+            self.rect[1] += self.game_speed
