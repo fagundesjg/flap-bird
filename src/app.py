@@ -91,7 +91,7 @@ class App():
 
     def handle_pipes(self):
         for sprite in self.pipe_group.sprites():
-            if sprite.rect[0] < int(self.size[0] / 4) and len(self.pipe_group.sprites()) <= 2:
+            if sprite.rect[0] < int(self.size[0] / 2.7) and len(self.pipe_group.sprites()) <= 2:
                 self.generate_pipe()
                 self.add_score()
             if self.__x_is_off_screen(sprite):
