@@ -18,7 +18,7 @@ class App():
         self.started = False
         self.gravity = GRAVITY
         self.clock = pygame.time.Clock()
-        self.backgrounds = IMAGES["BACKGROUNDS"]
+        self.schedule = 0
         self.bird = Bird()
         self.score = 0
         self.bird_group = pygame.sprite.Group()
@@ -28,6 +28,7 @@ class App():
         self.__add_bird()
         self.__add_ground()
         self.__render_score()
+        self.change_schedule()  # troca o dia pela noite
 
     def add_score(self):
         self.score += 1
@@ -43,6 +44,9 @@ class App():
             pipe = Pipe(color="green", game_speed=GAME_SPEED,
                         size=(int(SCREEN_SIZE[0] / 6), pipe_height), pos=(SCREEN_SIZE[0], pos_y), inverted=not bool(i))
             self.pipe_group.add(pipe)
+
+    def change_schedule(self):
+        self.schedule = (self.schedule + 1) % 2
 
     def __add_bird(self):
         # Responsável por fazer o passaro aparecer no centro da tela
@@ -108,7 +112,7 @@ class App():
             self.running = False
 
     def update(self):
-        SCREEN.blit(self.backgrounds[0], (0, 0))
+        SCREEN.blit(IMAGES["BACKGROUNDS"][self.schedule], (0, 0))
 
         self.handle_pipes()
         self.bird_group.update()
