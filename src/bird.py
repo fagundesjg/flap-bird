@@ -19,10 +19,11 @@ class Bird(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def bump(self):
-        self.game_speed -= int(SCREEN_SIZE[1] / 50)
+        self.game_speed -= int(SCREEN_SIZE[1] / 30)
         SOUNDS["BUMP"].play()
-        if self.game_speed < -int(SCREEN_SIZE[1] / 30):
-            self.game_speed = -int(SCREEN_SIZE[1] / 30)
+        if self.game_speed < -int(SCREEN_SIZE[1] / 35):
+            self.game_speed = -int(SCREEN_SIZE[1] / 35)
+            print("< - ", self.game_speed)
 
     def start(self):
         self.started = True

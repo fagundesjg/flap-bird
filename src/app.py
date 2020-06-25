@@ -4,6 +4,8 @@ import sys
 import pygame
 from pygame.locals import QUIT, K_SPACE, KEYDOWN
 from random import randint
+from threading import Thread
+from time import sleep
 
 from src.bird import Bird
 from src.ground import Ground
@@ -36,13 +38,16 @@ class App():
         SOUNDS["POINT"].play()
 
     def generate_pipe(self):
-        pipe_height = int(SCREEN_SIZE[1] / 2)
-        offset = randint(0, int(SCREEN_SIZE[1] / 3))
+        pipe_height = int(SCREEN_SIZE[1] * 0.8)
+        MAX_SPACINGS = 5.5
+        space_between_pipes = int(
+            SCREEN_SIZE[1] / MAX_SPACINGS) + SCREEN_SIZE[1] * 0.62
+        offsets = [-(randint(0, space_between_pipes))]
+        offsets.append(space_between_pipes + offsets[0])
         for i in range(2):
-            offset *= 1 if i == 1 else -1
-            pos_y = i * (SCREEN_SIZE[1] - int(SCREEN_SIZE[1] / 4)) + offset
+            pos_y = 0 if i == 0 else SCREEN_SIZE[1] - pipe_height
             pipe = Pipe(color="green", game_speed=GAME_SPEED,
-                        size=(int(SCREEN_SIZE[0] / 6), pipe_height), pos=(SCREEN_SIZE[0], pos_y), inverted=not bool(i))
+                        size=(int(SCREEN_SIZE[0] / 6), pipe_height), pos=(SCREEN_SIZE[0], pos_y + offsets[i]), inverted=not bool(i))
             self.pipe_group.add(pipe)
 
     def change_schedule(self):
@@ -84,11 +89,15 @@ class App():
 
     def handle_pipes(self):
         for sprite in self.pipe_group.sprites():
-            if sprite.rect[0] < int(SCREEN_SIZE[0] / 2.7) and len(self.pipe_group.sprites()) <= 2:
+            if sprite.rect[0] < int(SCREEN_SIZE[0] / 2.3) and len(self.pipe_group.sprites()) <= 2:
                 self.generate_pipe()
                 self.add_score()
             if self.__x_is_off_screen(sprite):
                 self.pipe_group.remove(sprite)
+
+    def start_game(self):
+        sleep(1)
+        self.generate_pipe()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -103,7 +112,7 @@ class App():
                     if event.key == K_SPACE:
                         self.started = True
                         self.bird.start()
-                        self.generate_pipe()
+                        Thread(target=self.start_game).start()
 
         if (pygame.sprite.groupcollide(self.bird_group, self.ground_group, False, False, pygame.sprite.collide_mask)):
             self.running = False
